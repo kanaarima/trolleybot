@@ -135,3 +135,13 @@ class Akatsuki:
         if req.status_code != 200:
             return None
         return UserInfo.from_dict(req.json())
+
+    def lookup_user(self, username: str) -> int:
+        req = self.request(f"https://akatsuki.gg/api/v1/users/lookup?name={username}")
+        if not req.status_code == 200:
+            return -1
+        for user in req.json()['users']:
+            if user['username'].lower() == username.lower():
+                return user['id']
+        return -1
+    
