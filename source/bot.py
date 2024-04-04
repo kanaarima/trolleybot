@@ -14,9 +14,6 @@ commands = [Dingbob()]
 async def on_message(message: discord.Message):
     if message.author.bot:
         return
-    if 'needs to do something' in message.content.lower():
-        await message.reply(f'<:adachitrue:1222126444444909598>')
-        return
     if message.content.startswith('t!'):
         split = shlex.split(message.content)
         trigger = split[0][2:]
@@ -26,5 +23,11 @@ async def on_message(message: discord.Message):
                 await command.run(message, args)
                 return
         await message.reply("Command not found!")
+    else:
+        if len(message.content) > 200:
+            await message.reply(f"https://tenor.com/view/adachi-persona-persona4-ultimax-talk-gif-25156593")
+            return
+        if 'needs to do something' in message.content.lower():
+            await message.reply(f'<:adachitrue:1222126444444909598>')
 
 client.run(config.DISCORD_BOT_TOKEN)
