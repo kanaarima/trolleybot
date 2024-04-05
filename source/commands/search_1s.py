@@ -6,6 +6,7 @@ from discord.ui import View, button, Button
 from mods import Mods
 import discord
 import cache
+import collection
 
 class FirstPlacesView(View):
     
@@ -77,7 +78,11 @@ class FirstPlacesView(View):
     @button(label="Download as osdb", style=discord.ButtonStyle.blurple)
     async def download_osdb(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer()
-        
+        file = collection.generate_collection_from_list(self.first_places, "First Places")
+        try:
+            await interaction.message.reply(file=discord.File(fp=io.BytesIO(file), filename="first_places.osdb"))
+        except Exception as e:
+            print(e)
     
     def sort(self, sort_method: str, desc: bool):
         if sort_method == 'hit length':
