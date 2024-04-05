@@ -27,6 +27,18 @@ class AkatsukiBeatmap(Model):
         beatmap.latest_update = datetime.strptime(beatmap.latest_update, DATE_FORMAT)
         return beatmap
 
+    def from_cache(dict):
+        return AkatsukiBeatmap.from_dict(dict)
+
+    def to_cache(self):
+        cache = dict()
+        for k, v in self.__dict__.items():
+            if k == 'latest_update':
+                cache[k] = v.strftime(DATE_FORMAT)
+            else:
+                cache[k] = v
+        return cache
+
 class Score(Model):
     id: int
     beatmap_md5: str
@@ -56,6 +68,19 @@ class Score(Model):
             score.beatmap = AkatsukiBeatmap.from_dict(dict['beatmap'])
         return score
 
+    def from_cache(dict):
+        return Score.from_dict(dict)
+
+    def to_cache(self):
+        cache = dict()
+        for k, v in self.__dict__.items():
+            if k == 'time':
+                cache[k] = v.strftime(DATE_FORMAT)
+            elif k == 'beatmap':
+                cache[k] = v.to_cache()
+            else:
+                cache[k] = v
+        return cache
 
 class ClanInfo(Model):
     id: int
@@ -144,4 +169,6 @@ class Akatsuki:
             if user['username'].lower() == username.lower():
                 return user['id']
         return -1
+    
+instance = Akatsuki()
     
