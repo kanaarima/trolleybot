@@ -1,4 +1,5 @@
-from commands.dingbob import Dingbob
+from commands.search_1s import SearchUser1s
+from commands.user_info import UserInfo
 
 import discord
 import config
@@ -8,7 +9,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = discord.Client(intents=intents)
-commands = [Dingbob()]
+commands = [UserInfo(), SearchUser1s()]
 
 @client.event
 async def on_message(message: discord.Message):
@@ -20,7 +21,7 @@ async def on_message(message: discord.Message):
         args = split[1:]
         for command in commands:
             if command.is_me(trigger):
-                await command.run(message, args)
+                await command.run(message, args, command.parse_args(args))
                 return
         await message.reply("Command not found!")
     else:
