@@ -94,40 +94,47 @@ class FirstPlacesView(View):
         embed = self.get_embed()
         await message.reply(embed=embed, view=self)
 
-class SearchUser1s(Command):
-    
-    def __init__(self) -> None:
-        super().__init__('searchuser1s', 'Search 1s')
+async def filter_1s(message: discord.Message, first_places: list[Score], parsed: dict[str, str]) -> list[Score]:
+        attributes_scores = []
 
-    async def run(self, message: discord.Message, args: list[str],  parsed: dict[str, str]):
-        if len(parsed['default']) == 0:
-            await message.reply("Please specify an user")
-            return
-        if 'mode' in parsed:
-            mode, relax = parsed['mode']
-        else:
-            mode, relax = 0,0
-        user_id = instance.lookup_user(parsed['default'][0])
-        if user_id == -1:
-            await message.reply("User not found")
-            return
-        await message.reply(f"Fetching first places...")
+        blacklisted_attributes = ['completed', 'mods', 'play_mode']
+        for k,v in first_places[0].__dict__.items():
+            if k in blacklisted_attributes:
+                continue
+            if type(v) == int or type(v) == float:
+                attributes_scores.append(k)
 
-        first_places = cache.lookup_first_places(user_id, mode, relax)
-        if 'max_accuracy' in parsed:
-            max_acc = float(parsed['max_accuracy'])
-            new_firsts = []
-            for score in first_places:
-                if score.accuracy <= max_acc:
-                    new_firsts.append(score)
-            first_places = new_firsts
-        if 'min_accuracy' in parsed:
-            min_acc = float(parsed['min_accuracy'])
-            new_firsts = []
-            for score in first_places:
-                if score.accuracy >= min_acc:
-                    new_firsts.append(score)
-            first_places = new_firsts
+        attributes_special = ['has_mods', 'exclude_mods']
+
+        async def warn_invalid_attribute():
+            await message.reply(f"Invalid attribute! Valid attributes: {', '.join(attributes_scores+attributes_special)}")
+
+        for key in parsed.keys():
+            if key.startswith("min_"):
+                attribute = key[4:]
+                if attribute in attributes_scores:
+                    min_val = float(parsed[key])
+                    new_firsts = []
+                    for score in first_places:
+                        if getattr(score, attribute) >= min_val:
+                            new_firsts.append(score)
+                    first_places = new_firsts
+                else:
+                    await warn_invalid_attribute()
+                    return
+            if key.startswith("max_"):
+                attribute = key[4:]
+                if attribute in attributes_scores:
+                    max_val = float(parsed[key])
+                    new_firsts = []
+                    for score in first_places:
+                        if getattr(score, attribute) <= max_val:
+                            new_firsts.append(score)
+                    first_places = new_firsts
+                else:
+                    await warn_invalid_attribute()
+                    return
+            
         if 'has_mods' in parsed:
             new_firsts = []
             mods = Mods.from_string(parsed['has_mods'])
@@ -154,32 +161,69 @@ class SearchUser1s(Command):
                 if not bad:
                     new_firsts.append(score)
             first_places = new_firsts
-        if 'min_pp' in parsed:
-            min_pp = float(parsed['min_pp'])
-            new_firsts = []
-            for score in first_places:
-                if score.pp >= min_pp:
-                    new_firsts.append(score)
-            first_places = new_firsts
-        if 'max_pp' in parsed:
-            max_pp = float(parsed['max_pp'])
-            new_firsts = []
-            for score in first_places:
-                if score.pp <= max_pp:
-                    new_firsts.append(score)
-            first_places = new_firsts
-        if 'max_combo' in parsed:
-            max_combo = int(parsed['max_combo'])
-            new_firsts = []
-            for score in first_places:
-                if score.max_combo <= max_combo:
-                    new_firsts.append(score)
-            first_places = new_firsts
-        if 'min_combo' in parsed:
-            min_combo = int(parsed['min_combo'])
-            new_firsts = []
-            for score in first_places:
-                if score.max_combo >= min_combo:
-                    new_firsts.append(score)
-            first_places = new_firsts
+        return first_places
+    
+class SearchUser1s(Command):
+    
+    def __init__(self) -> None:
+        super().__init__('searchuser1s', 'Search 1s')
+
+    async def run(self, message: discord.Message, args: list[str],  parsed: dict[str, str]):
+        if len(parsed['default']) == 0:
+            await message.reply("Please specify an user")
+            return
+        if 'mode' in parsed:
+            mode, relax = parsed['mode']
+        else:
+            mode, relax = 0,0
+        user_id = instance.lookup_user(parsed['default'][0])
+        if user_id == -1:
+            await message.reply("User not found")
+            return
+        await message.reply(f"Fetching first places...")
+
+        first_places = cache.lookup_first_places(user_id, mode, relax)
+        if len(first_places) == 0:
+            await message.reply("No first places found!")
+            return
+        first_places = await filter_1s(message, first_places, parsed)
+        if not first_places:
+            return
+
         await FirstPlacesView(f"First places for {user_id}", first_places).reply(message)
+
+class SearchClan1s(Command):
+    
+    def __init__(self) -> None:
+        super().__init__('searchclan1s', 'Search clan 1s')
+
+    async def run(self, message: discord.Message, args: list[str],  parsed: dict[str, str]):
+        if len(parsed['default']) == 0:
+            await message.reply("Please specify a clan id")
+            return
+        if 'mode' in parsed:
+            mode, relax = parsed['mode']
+        else:
+            mode, relax = 0,0
+        try:
+            clan_id = int(parsed['default'][0])
+            members = instance.get_clan_members(clan_id)
+        except ValueError:
+            await message.reply("Invalid clan id")
+        except Exception as e:
+            print(e)
+            await message.reply("Error fetching clan info!")
+        await message.reply(f"Fetching first places...")
+
+        first_places = list()
+        for member in members:
+            first_places += cache.lookup_first_places(member, mode, relax)
+
+        if len(first_places) == 0:
+            await message.reply("No first places found!")
+            return
+        first_places = await filter_1s(message, first_places, parsed)
+        if not first_places:
+            return
+
+        await FirstPlacesView(f"First places for clan {clan_id}", first_places).reply(message)

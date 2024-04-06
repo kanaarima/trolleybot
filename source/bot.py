@@ -1,4 +1,4 @@
-from commands.search_1s import SearchUser1s
+from commands.search_1s import SearchUser1s, SearchClan1s
 from commands.user_info import UserInfo
 
 import discord
@@ -9,7 +9,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = discord.Client(intents=intents)
-commands = [UserInfo(), SearchUser1s()]
+commands = [UserInfo(), SearchUser1s(), SearchClan1s()]
 
 @client.event
 async def on_message(message: discord.Message):
