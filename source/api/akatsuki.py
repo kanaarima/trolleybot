@@ -1,8 +1,8 @@
 from dataclasses import dataclass
+from bs4 import BeautifulSoup
 from datetime import datetime
 from utils import Model
 from typing import *
-
 import requests
 import time
 
@@ -169,6 +169,13 @@ class Akatsuki:
             if user['username'].lower() == username.lower():
                 return user['id']
         return -1
+    
+    def get_clan_members(self, clan_id: int):
+        req = self.request(f"https://akatsuki.gg/c/{clan_id}?mode=0&rx=1")
+        bs4 = BeautifulSoup(req.text, 'html.parser')
+        players = bs4.find_all('a', class_="player")
+        return [int(player['href'].split('/')[-1]) for player in players]
+        
     
 instance = Akatsuki()
     
