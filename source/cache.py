@@ -11,7 +11,7 @@ os.makedirs("../cache/first_places", exist_ok=True)
 def lookup_first_places(user_id, mode, relax) -> list[Score]:
     total_count = instance.get_user_first_places(user_id, mode, relax, True)[1]
     if total_count < 3000:
-        cache_seconds = max((200/instance.req_min) * (total_count / 100), 180)
+        cache_seconds = max((300/instance.req_min) * (total_count / 100), 180)
     else:
         cache_seconds = 86400
     if os.path.exists(f"../cache/first_places/{user_id}_{mode}_{relax}.json"):
