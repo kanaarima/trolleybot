@@ -104,7 +104,7 @@ async def filter_1s(message: discord.Message, first_places: list[Score], parsed:
             if type(v) == int or type(v) == float:
                 attributes_scores.append(k)
 
-        attributes_special = ['has_mods', 'exclude_mods']
+        attributes_special = ['has_mods', 'exclude_mods', 'not_3mod_ss']
 
         async def warn_invalid_attribute():
             await message.reply(f"Invalid attribute! Valid attributes: {', '.join(attributes_scores+attributes_special)}")
@@ -159,6 +159,22 @@ async def filter_1s(message: discord.Message, first_places: list[Score], parsed:
                         bad = True
                         break
                 if not bad:
+                    new_firsts.append(score)
+            first_places = new_firsts
+        if 'not_3mod_ss' in parsed:
+            new_firsts = []
+            to_exclude = Mods.from_string("HDDTHR")
+            for score in first_places:
+                mods = Mods(score.mods)
+                is_3mod = True
+                for mod in to_exclude.members:
+                    if mod not in mods.members:
+                        new_firsts.append(score)
+                        is_3mod = False
+                        break
+                if not is_3mod:
+                    continue
+                if score.accuracy < 100:
                     new_firsts.append(score)
             first_places = new_firsts
         return first_places
