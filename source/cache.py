@@ -10,7 +10,7 @@ os.makedirs("../cache/first_places", exist_ok=True)
 
 def calc_cache_seconds(total_count):
     if total_count < 3000:
-        return max((300/instance.req_min) * (total_count / 100), 300)
+        return max((400/instance.req_min) * (total_count / 100), 600)
     else:
         return 86400
 
