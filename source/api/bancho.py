@@ -58,8 +58,11 @@ class Beatmap(Model):
         )
         
 def get_beatmap(beatmap_id) -> Beatmap:
-    api_beatmap = client.beatmap(beatmap_id)
-    api_beatmapset = api_beatmap.beatmapset()
+    try:
+        api_beatmap = client.beatmap(beatmap_id)
+        api_beatmapset = api_beatmap.beatmapset()
+    except:
+        return None
     return Beatmap(
         beatmap_id=api_beatmap.id,
         beatmapset_id=api_beatmap.beatmapset_id,
