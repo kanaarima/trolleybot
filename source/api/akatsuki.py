@@ -1,8 +1,11 @@
 from dataclasses import dataclass
 from bs4 import BeautifulSoup
+from api.bancho import Beatmap
 from datetime import datetime
 from utils import Model
 from typing import *
+
+import api.bancho as bancho
 import requests
 import time
 
@@ -60,12 +63,14 @@ class Score(Model):
     completed: int
     pinned: bool
     beatmap: AkatsukiBeatmap
+    actual_beatmap: Beatmap
 
     def from_dict(dict):
         score = Score(**dict)
         score.time = datetime.strptime(score.time, DATE_FORMAT)
         if 'beatmap' in dict:
             score.beatmap = AkatsukiBeatmap.from_dict(dict['beatmap'])
+            score.actual_beatmap = bancho.get_beatmap_cached(score.beatmap.beatmap_id)
         return score
 
     def from_cache(dict):
@@ -78,6 +83,8 @@ class Score(Model):
                 cache[k] = v.strftime(DATE_FORMAT)
             elif k == 'beatmap':
                 cache[k] = v.to_cache()
+            elif k == 'actual_beatmap':
+                continue
             else:
                 cache[k] = v
         return cache
