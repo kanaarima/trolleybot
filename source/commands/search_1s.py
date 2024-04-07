@@ -7,6 +7,7 @@ from mods import Mods
 import discord
 import cache
 import collection
+from utils import MapStats
 
 class FirstPlacesView(View):
     
@@ -25,11 +26,21 @@ class FirstPlacesView(View):
         #embed.description = "```"
         embed.description = ""
         for score in self.first_places[int(self.page*7):int((self.page+1)*7)]:
-            title = f"**{score.beatmap.song_name}**"
-            desc = f"[{score.count_300}/{score.count_100}/{score.count_50}/{score.count_miss}] {score.max_combo}x/{score.beatmap.max_combo}x {score.pp}pp {score.rank} {score.accuracy:.2f}% +{Mods(score.mods).short} \nSet on: {score.time.strftime('%Y-%m-%d %H:%M:%S')}"
+            title = f"__**{score.beatmap.song_name}**__"
+            desc = f"[{score.count_300}/{score.count_100}/{score.count_50}/{score.count_miss}] {score.max_combo}x/{score.beatmap.max_combo}x {score.pp}pp {score.rank} {score.accuracy:.2f}% +{Mods(score.mods).short}"
+            if getattr(score, 'actual_beatmap', None) is not None:
+                map_stats = MapStats(score.mods, score.actual_beatmap.ar, score.actual_beatmap.od, score.actual_beatmap.hp, score.actual_beatmap.cs, score.actual_beatmap.bpm)
+                if score.mods & 64:
+                    length = score.actual_beatmap.hit_length/1.5
+                else:
+                    length = score.actual_beatmap.hit_length
+                desc += f"\n**Length**: {length:.1f}s **BPM**: {map_stats.bpm:.0f} **AR**: {map_stats.ar:.1f} **OD**: {map_stats.od:.1f} **CS**: {map_stats.cs:.1f}"
+            else:
+                desc += f"\nCould not get beatmap info (Deleted set?)"
+            desc += f"\n Set on: {score.time.strftime('%Y-%m-%d %H:%M:%S')} [Direct](https://kanaarima.github.io/osu/osudl.html?beatmap={score.beatmap.beatmap_id}) [Bancho](https://osu.ppy.sh/b/{score.beatmap.beatmap_id}) [Akatsuki](https://akatsuki.gg/b/{score.beatmap.beatmap_id})"
             embed.description += f"{title}\n{desc}\n"
         return embed
-    
+
     @button(label="Previous", style=discord.ButtonStyle.gray)
     async def prev_page(self, interaction: discord.Interaction, button: discord.ui.Button):
         if self.page > 0:
@@ -96,18 +107,25 @@ class FirstPlacesView(View):
 
 async def filter_1s(message: discord.Message, first_places: list[Score], parsed: dict[str, str]) -> list[Score]:
         attributes_scores = []
+        attributes_beatmap = []
 
-        blacklisted_attributes = ['completed', 'mods', 'play_mode']
+        blacklisted_attributes = ['completed', 'mods', 'play_mode', 'actual_beatmap']
         for k,v in first_places[0].__dict__.items():
             if k in blacklisted_attributes:
                 continue
             if type(v) == int or type(v) == float:
                 attributes_scores.append(k)
 
+        for k,v in first_places[0].actual_beatmap.__dict__.items():
+            if k in blacklisted_attributes:
+                continue
+            if type(v) == int or type(v) == float:
+                attributes_beatmap.append(k)
+        
         attributes_special = ['has_mods', 'exclude_mods', 'not_3mod_ss']
 
         async def warn_invalid_attribute():
-            await message.reply(f"Invalid attribute! Valid attributes: {', '.join(attributes_scores+attributes_special)}")
+            await message.reply(f"Invalid attribute! Valid attributes: {', '.join(attributes_scores+attributes_beatmap+attributes_special)}")
 
         for key in parsed.keys():
             if key.startswith("min_"):
@@ -117,6 +135,13 @@ async def filter_1s(message: discord.Message, first_places: list[Score], parsed:
                     new_firsts = []
                     for score in first_places:
                         if getattr(score, attribute) >= min_val:
+                            new_firsts.append(score)
+                    first_places = new_firsts
+                elif attribute in attributes_beatmap:
+                    min_val = float(parsed[key])
+                    new_firsts = []
+                    for score in first_places:
+                        if getattr(score.actual_beatmap, attribute) >= min_val:
                             new_firsts.append(score)
                     first_places = new_firsts
                 else:
@@ -129,6 +154,13 @@ async def filter_1s(message: discord.Message, first_places: list[Score], parsed:
                     new_firsts = []
                     for score in first_places:
                         if getattr(score, attribute) <= max_val:
+                            new_firsts.append(score)
+                    first_places = new_firsts
+                elif attribute in attributes_beatmap:
+                    max_val = float(parsed[key])
+                    new_firsts = []
+                    for score in first_places:
+                        if getattr(score.actual_beatmap, attribute) <= max_val:
                             new_firsts.append(score)
                     first_places = new_firsts
                 else:
@@ -204,8 +236,8 @@ class SearchUser1s(Command):
             return
         first_places = await filter_1s(message, first_places, parsed)
         if not first_places:
+            await message.reply(f"No first places found for {user_id}!")
             return
-
         await FirstPlacesView(f"First places for {user_id}", first_places).reply(message)
 
 class SearchClan1s(Command):
