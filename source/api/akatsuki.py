@@ -63,7 +63,7 @@ class Score(Model):
     completed: int
     pinned: bool
     beatmap: AkatsukiBeatmap
-    actual_beatmap: Beatmap
+    actual_beatmap: Beatmap = None
 
     def from_dict(dict):
         score = Score(**dict)
@@ -161,6 +161,10 @@ class Akatsuki:
             first_places += [Score.from_dict(score) for score in req.json()['scores']]
             page += 1
         return first_places, req.json()['total']
+
+    def get_user_best(self, user_id: int, mode: int, relax: int, page: int = 1) -> List[Score]:
+        req = self.request(f"https://akatsuki.gg/api/v1/users/scores/best?mode={mode}&p={page}&l=100&rx={relax}&id={user_id}")
+        return [Score.from_dict(score) for score in req.json()['scores']]
 
     def get_user_stats(self, user_id: int) -> UserInfo:
         req = self.request(f"https://akatsuki.gg/api/v1/users/full?id={user_id}")
