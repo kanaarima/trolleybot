@@ -1,4 +1,5 @@
 from commands.search_1s import SearchUser1s, SearchClan1s
+from commands.yoruba_quotes import YorubaQuotesCommand
 from commands.user_info import UserInfo
 
 import discord
@@ -9,7 +10,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = discord.Client(intents=intents)
-commands = [UserInfo(), SearchUser1s(), SearchClan1s()]
+commands = [UserInfo(), SearchUser1s(), SearchClan1s(), YorubaQuotesCommand()]
 
 @client.event
 async def on_message(message: discord.Message):

@@ -8,7 +8,7 @@ import discord
 import cache
 import collection
 from utils import MapStats
-
+import time
 class FirstPlacesView(View):
     
     def __init__(self, title: str, first_places: list[Score]) -> None:
@@ -18,11 +18,21 @@ class FirstPlacesView(View):
         self.page = 0
         self.desc = True
         self.current_sort = 0
+        self.length = 0
+        for first_place in first_places:
+            if first_place.actual_beatmap:
+                length = first_place.actual_beatmap.hit_length
+            else:
+                length = first_place.beatmap.hit_length
+            if first_place.mods & 64:
+                self.length += length / 1.5
+            else:
+                self.length += length / 1.5
         self.sort_methods = ['pp', 'mods', 'rank', 'accuracy', 'max_combo', 'hit length', 'time']
         self.sort(self.sort_methods[self.current_sort], self.desc)
 
     def get_embed(self) -> discord.Embed:
-        embed = discord.Embed(title=f"{self.title} | Page {self.page+1}/{int(len(self.first_places)/7)+1} ({len(self.first_places)})", color=discord.Color.red())
+        embed = discord.Embed(title=f"{self.title} | Page {self.page+1}/{int(len(self.first_places)/7)+1} ({len(self.first_places)}) ({self.length/60/60:.2f} hours)", color=discord.Color.red())
         #embed.description = "```"
         embed.description = ""
         for score in self.first_places[int(self.page*7):int((self.page+1)*7)]:
@@ -97,7 +107,7 @@ class FirstPlacesView(View):
     
     def sort(self, sort_method: str, desc: bool):
         if sort_method == 'hit length':
-            self.first_places.sort(key=lambda x: x.beatmap.hit_length, reverse=desc)
+            self.first_places.sort(key=lambda x: x.actual_beatmap.hit_length if x.actual_beatmap else x.beatmap.hit_length, reverse=desc)
         else:
             self.first_places.sort(key=lambda x: getattr(x, sort_method), reverse=desc)
 
@@ -141,8 +151,9 @@ async def filter_1s(message: discord.Message, first_places: list[Score], parsed:
                     min_val = float(parsed[key])
                     new_firsts = []
                     for score in first_places:
-                        if getattr(score.actual_beatmap, attribute) >= min_val:
-                            new_firsts.append(score)
+                        if score.actual_beatmap:
+                            if getattr(score.actual_beatmap, attribute) >= min_val:
+                                new_firsts.append(score)
                     first_places = new_firsts
                 else:
                     await warn_invalid_attribute()
@@ -153,8 +164,9 @@ async def filter_1s(message: discord.Message, first_places: list[Score], parsed:
                     max_val = float(parsed[key])
                     new_firsts = []
                     for score in first_places:
-                        if getattr(score, attribute) <= max_val:
-                            new_firsts.append(score)
+                        if score.actual_beatmap:
+                            if getattr(score, attribute) <= max_val:
+                                new_firsts.append(score)
                     first_places = new_firsts
                 elif attribute in attributes_beatmap:
                     max_val = float(parsed[key])
