@@ -229,7 +229,7 @@ class SearchUser1s(Command):
     def __init__(self) -> None:
         super().__init__('searchuser1s', 'Search 1s')
         self.help = """
-        Arguments: <username/userid> <mode> (Filters)
+        Arguments: <username/userid> <-mode> (Filters)
         Modes: std/std_rx/std_ap/taiko/taiko_rx/ctb/ctb_rx/mania
         Available filters:
         Mod filters: has_mods, exclude_mods, not_3mod_ss (ex. -has_mods DT)
@@ -268,6 +268,14 @@ class SearchClan1s(Command):
     
     def __init__(self) -> None:
         super().__init__('searchclan1s', 'Search clan 1s')
+        self.help = """
+        Arguments: <clan_id> <-mode> (Filters)
+        Modes: std/std_rx/std_ap/taiko/taiko_rx/ctb/ctb_rx/mania
+        Available filters:
+        Mod filters: has_mods, exclude_mods, not_3mod_ss (ex. -has_mods DT)
+        General parameters: score, max_combo, count_300, count_100, count_50, count_geki, count_katu, count_miss, accuracy, pp, beatmap_id, beatmapset_id, max_combo, hit_length, total_length, bpm, ar, od, cs, hp
+        Example: t!searchclan1s 6977 -min_score 1000 -max_accuracy 99 -std_rx
+        """
 
     async def run(self, message: discord.Message, args: list[str],  parsed: dict[str, str]):
         if len(parsed['default']) == 0:

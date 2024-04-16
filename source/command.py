@@ -6,6 +6,7 @@ class Command:
         self.command_name = command_name
         self.description = description
         self.triggers = triggers if triggers else [command_name]
+        self.help = "No help provided."
     
     def is_me(self, trigger):
         if trigger == self.command_name:
