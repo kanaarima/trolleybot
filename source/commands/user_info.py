@@ -9,6 +9,10 @@ import pp
 class UserInfo(Command):
     def __init__(self) -> None:
         super().__init__('user_info', 'Get information about a user')
+        self.help = """
+        Arguments: <username/userid> <-mode>
+        Modes: std/std_rx/std_ap/taiko/taiko_rx/ctb/ctb_rx/mania
+        """
 
     async def run(self, message: discord.Message, args: list[str],  parsed: dict[str, str]):
         if len(parsed['default']) == 0:
@@ -102,6 +106,11 @@ class GenerateTopPlaysCollection(Command):
 
     def __init__(self) -> None:
         super().__init__('top_plays_collection', 'Generate a collection of top plays')
+        self.help = """
+        Arguments: <username/userid> (-pages N) (-mode)
+        Modes: std/std_rx/std_ap/taiko/taiko_rx/ctb/ctb_rx/mania
+        N: number of pages (default 1, 1 page = 100 scores)
+        """
 
     async def run(self, message: discord.Message, args: list[str],  parsed: dict[str, str]):
         if len(parsed['default']) == 0:
@@ -110,10 +119,14 @@ class GenerateTopPlaysCollection(Command):
             mode, relax = parsed['mode']
         else:
             mode, relax = 0,0
-        user_id = instance.lookup_user(parsed['default'][0])
+        if parsed['default'][0].isnumeric():
+            user_id = int(parsed['default'][0])
+        else:
+            user_id = instance.lookup_user(parsed['default'][0])
         if user_id == -1:
             await message.reply("User not found")
             return
+
         pages = 1
         if 'pages' in parsed:
             pages = int(parsed['pages'])
