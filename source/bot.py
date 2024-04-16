@@ -1,6 +1,7 @@
 from commands.search_1s import SearchUser1s, SearchClan1s
 from commands.yoruba_quotes import YorubaQuotesCommand
-from commands.user_info import UserInfo
+from commands.user_info import UserInfo, UserSkills, GenerateTopPlaysCollection
+from commands.debug import TestSkill
 
 import discord
 import config
@@ -10,7 +11,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = discord.Client(intents=intents)
-commands = [UserInfo(), SearchUser1s(), SearchClan1s(), YorubaQuotesCommand()]
+commands = [UserInfo(), SearchUser1s(), SearchClan1s(), YorubaQuotesCommand(), TestSkill(), UserSkills(), GenerateTopPlaysCollection()]
 
 @client.event
 async def on_message(message: discord.Message):
