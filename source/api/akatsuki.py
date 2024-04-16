@@ -174,7 +174,7 @@ class Akatsuki:
 
     def lookup_user(self, username: str) -> int:
         req = self.request(f"https://akatsuki.gg/api/v1/users/lookup?name={username}")
-        if not req.status_code == 200:
+        if not req.status_code == 200 or not req.json()['users']:
             return -1
         for user in req.json()['users']:
             if user['username'].lower() == username.lower():
@@ -185,8 +185,14 @@ class Akatsuki:
         req = self.request(f"https://akatsuki.gg/c/{clan_id}?mode=0&rx=1")
         bs4 = BeautifulSoup(req.text, 'html.parser')
         players = bs4.find_all('a', class_="player")
-        return [int(player['href'].split('/')[-1]) for player in players]
-        
+        members = list()
+        for player in players:
+            try:
+                members.append(int(player['href'].split('/')[-1]))     
+            except:
+                print("Cant process one restricted user!")
+                continue
+        return members   
     
 instance = Akatsuki()
     
