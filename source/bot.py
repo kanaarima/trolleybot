@@ -2,6 +2,7 @@ from commands.search_1s import SearchUser1s, SearchClan1s
 from commands.yoruba_quotes import YorubaQuotesCommand
 from commands.user_info import UserInfo, UserSkills, GenerateTopPlaysCollection
 from commands.debug import TestSkill
+from commands.help import HelpCommand
 
 import discord
 import config
@@ -11,7 +12,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = discord.Client(intents=intents)
-commands = [UserInfo(), SearchUser1s(), SearchClan1s(), YorubaQuotesCommand(), TestSkill(), UserSkills(), GenerateTopPlaysCollection()]
+commands = [UserInfo(), SearchUser1s(), SearchClan1s(), YorubaQuotesCommand(), TestSkill(), UserSkills(), GenerateTopPlaysCollection(), HelpCommand()]
 
 @client.event
 async def on_message(message: discord.Message):
@@ -33,4 +34,5 @@ async def on_message(message: discord.Message):
         if 'needs to do something' in message.content.lower():
             await message.reply(f'<:adachitrue:1222126444444909598>')
 
-client.run(config.DISCORD_BOT_TOKEN)
+if __name__ == '__main__':
+    client.run(config.DISCORD_BOT_TOKEN)
