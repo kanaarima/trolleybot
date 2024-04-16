@@ -231,10 +231,15 @@ class SearchUser1s(Command):
         self.help = """
         Arguments: <username/userid> <-mode> (Filters)
         Modes: std/std_rx/std_ap/taiko/taiko_rx/ctb/ctb_rx/mania
-        Available filters:
+        
+        **Available filters**:
         Mod filters: has_mods, exclude_mods, not_3mod_ss (ex. -has_mods DT)
-        General parameters: score, max_combo, count_300, count_100, count_50, count_geki, count_katu, count_miss, accuracy, pp, beatmap_id, beatmapset_id, max_combo, hit_length, total_length, bpm, ar, od, cs, hp
-        Example: t!searchuser1s Adachi -min_score 1000 -max_accuracy 99 -std_rx
+        **General parameters**: 
+        count_300, count_100, count_50, count_geki, count_katu, count_miss
+        score, max_combo, accuracy, pp
+        hit_length, total_length, bpm, ar, od, cs, hp
+        beatmap_id, beatmapset_id
+        **Example: t!searchuser1s Adachi -min_score 1000 -max_accuracy 99 -std_rx**
         """
 
     async def run(self, message: discord.Message, args: list[str],  parsed: dict[str, str]):
@@ -271,10 +276,15 @@ class SearchClan1s(Command):
         self.help = """
         Arguments: <clan_id> <-mode> (Filters)
         Modes: std/std_rx/std_ap/taiko/taiko_rx/ctb/ctb_rx/mania
-        Available filters:
+        
+        **Available filters**:
         Mod filters: has_mods, exclude_mods, not_3mod_ss (ex. -has_mods DT)
-        General parameters: score, max_combo, count_300, count_100, count_50, count_geki, count_katu, count_miss, accuracy, pp, beatmap_id, beatmapset_id, max_combo, hit_length, total_length, bpm, ar, od, cs, hp
-        Example: t!searchclan1s 6977 -min_score 1000 -max_accuracy 99 -std_rx
+        **General parameters**: 
+        count_300, count_100, count_50, count_geki, count_katu, count_miss
+        score, max_combo, accuracy, pp
+        hit_length, total_length, bpm, ar, od, cs, hp
+        beatmap_id, beatmapset_id
+        **Example: t!searchclan1s 6977 -min_score 1000 -max_accuracy 99 -std_rx**
         """
 
     async def run(self, message: discord.Message, args: list[str],  parsed: dict[str, str]):
