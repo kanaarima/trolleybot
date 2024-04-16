@@ -9,6 +9,7 @@ import cache
 import collection
 from utils import MapStats
 import time
+
 class FirstPlacesView(View):
     
     def __init__(self, title: str, first_places: list[Score]) -> None:
@@ -90,7 +91,7 @@ class FirstPlacesView(View):
         await interaction.response.defer()
         csv = "beatmap_id,count_300,count_100,count_50,count_miss,max_combo,pp,rank,accuracy,mods,hit_length,time,title,link\n"
         for score in self.first_places:
-            csv += f"{score.beatmap.beatmap_id},{score.count_300},{score.count_100},{score.count_50},{score.count_miss},{score.max_combo},{score.pp},{score.rank},{score.accuracy},{score.mods},{score.beatmap.hit_length},{score.time},{score.beatmap.song_name},https://osu.ppy.sh/b/{score.beatmap.beatmap_id}\n"
+            csv += f"{score.beatmap.beatmap_id},{score.count_300},{score.count_100},{score.count_50},{score.count_miss},{score.max_combo},{score.pp},{score.rank},{score.accuracy},{Mods(score.mods).short},{score.beatmap.hit_length},{score.time},{score.beatmap.song_name},https://osu.ppy.sh/b/{score.beatmap.beatmap_id}\n"
         try:
             await interaction.message.reply(file=discord.File(fp=io.BytesIO(csv.encode("utf-8")), filename="first_places.csv"))
         except Exception as e:
@@ -236,7 +237,10 @@ class SearchUser1s(Command):
             mode, relax = parsed['mode']
         else:
             mode, relax = 0,0
-        user_id = instance.lookup_user(parsed['default'][0])
+        if parsed['default'][0].isnumeric():
+            user_id = int(parsed['default'][0])
+        else:
+            user_id = instance.lookup_user(parsed['default'][0])
         if user_id == -1:
             await message.reply("User not found")
             return
@@ -270,6 +274,7 @@ class SearchClan1s(Command):
             members = instance.get_clan_members(clan_id)
         except ValueError:
             await message.reply("Invalid clan id")
+            return
         except Exception as e:
             print(e)
             await message.reply("Error fetching clan info!")
