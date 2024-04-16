@@ -165,16 +165,16 @@ async def filter_1s(message: discord.Message, first_places: list[Score], parsed:
                     max_val = float(parsed[key])
                     new_firsts = []
                     for score in first_places:
-                        if score.actual_beatmap:
-                            if getattr(score, attribute) <= max_val:
-                                new_firsts.append(score)
+                        if getattr(score, attribute) <= max_val:
+                            new_firsts.append(score)
                     first_places = new_firsts
                 elif attribute in attributes_beatmap:
                     max_val = float(parsed[key])
                     new_firsts = []
                     for score in first_places:
-                        if getattr(score.actual_beatmap, attribute) <= max_val:
-                            new_firsts.append(score)
+                        if score.actual_beatmap:
+                            if getattr(score.actual_beatmap, attribute) <= max_val:
+                                new_firsts.append(score)
                     first_places = new_firsts
                 else:
                     await warn_invalid_attribute()
