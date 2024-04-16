@@ -7,6 +7,8 @@ import os
 os.makedirs("../cache", exist_ok=True)
 os.makedirs("../cache/beatmaps", exist_ok=True)
 os.makedirs("../cache/first_places", exist_ok=True)
+os.makedirs("../cache/pp", exist_ok=True)
+
 
 def calc_cache_seconds(total_count):
     if total_count < 3000:
