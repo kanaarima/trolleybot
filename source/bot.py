@@ -1,3 +1,4 @@
+import traceback
 from commands.search_1s import SearchUser1s, SearchClan1s
 from commands.yoruba_quotes import YorubaQuotesCommand
 from commands.user_info import UserInfo, UserSkills, GenerateTopPlaysCollection
@@ -25,7 +26,12 @@ async def on_message(message: discord.Message):
         args = split[1:]
         for command in commands:
             if command.is_me(trigger):
-                await command.run(message, args, command.parse_args(args))
+                try:
+                    await command.run(message, args, command.parse_args(args))
+                except Exception as e:
+                    embed = discord.Embed(title=f"An error occurred! ({e.__class__.__name__})", color=discord.Color.red())
+                    embed.description = f"{str(e)}\n```py\n{traceback.format_exc()}\n```"
+                    await message.reply(embed=embed)
                 return
         await message.reply("Command not found!")
     else:
