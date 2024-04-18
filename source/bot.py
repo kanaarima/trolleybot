@@ -20,7 +20,7 @@ commands = [UserInfo(), SearchUser1s(), SearchClan1s(), YorubaQuotesCommand(), T
 async def on_message(message: discord.Message):
     if message.author.bot:
         return
-    if message.content.startswith('x!'):
+    if message.content.startswith('t!'):
         split = shlex.split(message.content)
         trigger = split[0][2:]
         args = split[1:]
