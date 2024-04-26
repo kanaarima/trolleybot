@@ -305,9 +305,17 @@ class SearchClan1s(Command):
             print(e)
             await message.reply("Error fetching clan info!")
         await message.reply(f"Fetching first places...")
-
+        to_exclude = list()
+        if 'exclude_members' in parsed:
+            for member in parsed['exclude_members'].split(","):
+                if member.isnumeric():
+                    to_exclude.append(int(member))
+                else:
+                    to_exclude.append(instance.lookup_user(member))
         first_places = list()
         for member in members:
+            if member in to_exclude:
+                continue
             first_places += cache.lookup_first_places(member, mode, relax)
 
         if len(first_places) == 0:
