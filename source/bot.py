@@ -5,7 +5,7 @@ from commands.user_info import UserInfo, UserSkills, GenerateTopPlaysCollection
 from commands.debug import TestSkill
 from commands.simulate import Simulate
 from commands.help import HelpCommand
-
+from commands.track1s import Track1s, Stop1sTrack
 import discord
 import config
 import shlex
@@ -14,7 +14,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = discord.Client(intents=intents)
-commands = [UserInfo(), SearchUser1s(), SearchClan1s(), YorubaQuotesCommand(), TestSkill(), UserSkills(), GenerateTopPlaysCollection(), HelpCommand(), Simulate()]
+commands = [UserInfo(), SearchUser1s(), SearchClan1s(), YorubaQuotesCommand(), TestSkill(), UserSkills(), GenerateTopPlaysCollection(), HelpCommand(), Simulate(),Track1s(), Stop1sTrack()]
 
 @client.event
 async def on_message(message: discord.Message):
